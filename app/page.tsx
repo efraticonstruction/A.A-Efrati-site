@@ -6,8 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Hammer, ShoppingCart, Star, CheckCircle2, Trash2, LayoutGrid, Home, 
   Droplets, Zap, DoorOpen, Utensils,  ShieldCheck, Box, 
-  Settings, Ruler, Tool, HardHat, Paintbucket, Construction, 
-  MessageSquare, Award
+  Settings, Ruler, Paintbucket, 
+  MessageSquare,
 } from "lucide-react";
 
 // --- בסיס נתונים ענק של תמונות ומפרטים 2026 ---
