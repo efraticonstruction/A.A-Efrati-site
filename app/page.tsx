@@ -5,7 +5,7 @@ import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Hammer, ShoppingCart, Star, CheckCircle2, Trash2, LayoutGrid, Home, 
-  Droplets, Zap, DoorOpen, Utensils, Stairs, ShieldCheck, Box, 
+  Droplets, Zap, DoorOpen, Utensils,  ShieldCheck, Box, 
   Settings, Ruler, Tool, HardHat, Paintbucket, Construction, 
   MessageSquare, Award
 } from "lucide-react";
