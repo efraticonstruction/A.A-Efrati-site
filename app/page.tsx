@@ -1,5 +1,6 @@
 "use client";
 
+import "./globals.css";
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
