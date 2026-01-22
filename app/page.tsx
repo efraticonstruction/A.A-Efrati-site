@@ -4,10 +4,9 @@ import "./globals.css";
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Hammer, ShoppingCart, Star, CheckCircle2, Trash2, LayoutGrid, Home, 
-  Droplets, Zap, DoorOpen, Utensils,  ShieldCheck, Box, 
-  Settings, Ruler, Paintbucket, 
-  MessageSquare,
+  Hammer, ShoppingCart, Star, CheckCircle2, Trash2, LayoutGrid, Home,
+  Droplets, Zap, Utensils, ShieldCheck, Box,
+  Settings, Ruler, MessageSquare
 } from "lucide-react";
 
 // --- בסיס נתונים ענק של תמונות ומפרטים 2026 ---
