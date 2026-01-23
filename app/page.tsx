@@ -11,7 +11,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 // --- הגדרות מערכת ---
-const PHONE_NUMBER = "972500000000"; // עדכן למספר שלך
+const PHONE_NUMBER = "972556808431"; // עדכן למספר שלך
 const SERVICE_AREAS = "מרכז | ירושלים | יהודה ושומרון";
 
 export default function AAEfratiEnterpriseSite() {
