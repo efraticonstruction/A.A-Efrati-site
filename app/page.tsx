@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { 
   Hammer, Star, CheckCircle2, LayoutGrid, Home, Droplets, Zap, Utensils, 
   ShieldCheck, Ruler, MessageSquare, Phone, Instagram, Facebook, Layers, 
@@ -10,16 +10,41 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// --- הגדרות מערכת ---
-const PHONE_NUMBER = "972556808431"; // עדכן למספר שלך
+// --- הגדרות קבועות ---
+const PHONE_NUMBER = "972500000000"; 
+const BRAND_NAME = "א.א אפרתי";
 const SERVICE_AREAS = "מרכז | ירושלים | יהודה ושומרון";
 
-export default function AAEfratiEnterpriseSite() {
+// --- מאגר נתונים מלא ומדויק (ללא כפילויות) ---
+const ALL_DATA = [
+  // שירותי בנייה ושלד
+  { id: "s1", type: "service", cat: "בנייה ושלד", title: "בניית וילות יוקרה", desc: "ביצוע מאפס עד מפתח בסטנדרט הנדסי עליון.", price: "9,500", unit: "מ\"ר", icon: Home, img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800" },
+  { id: "s2", type: "service", cat: "בנייה ושלד", title: "תוספות בנייה והרחבות", desc: "הרחבת מבנים קיימים כולל אישורי קונסטרוקטור.", price: "8,200", unit: "מ\"ר", icon: Layers, img: "https://images.unsplash.com/photo-1541913055-94490e2c0bb5?q=80&w=800" },
+  { id: "s3", type: "service", cat: "בנייה ושלד", title: "בניית ממ\"דים תקניים", desc: "מיגון הבית לפי הנחיות פיקוד העורף.", price: "120,000", unit: "יח'", icon: ShieldCheck, img: "https://images.unsplash.com/photo-1590059132612-58832a57894a?q=80&w=800" },
+  { id: "s4", type: "service", cat: "תשתיות", title: "אינסטלציה מתקדמת", desc: "מערכות צנרת חכמות ומניעת נזילות.", price: "2,500", unit: "נקודה", icon: Droplets, img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800" },
+  { id: "s5", type: "service", cat: "תשתיות", title: "חשמל ותקשורת", desc: "תשתית בית חכם ולוחות חשמל מורכבים.", price: "450", unit: "נקודה", icon: Zap, img: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800" },
+  { id: "s6", type: "service", cat: "מערכות", title: "בריכות שחייה", desc: "תכנון וביצוע בריכות בטון וגלישה.", price: "150,000", unit: "החל מ-", icon: Waves, img: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=800" },
+  { id: "s7", type: "service", cat: "גמר", title: "ריצוף וחיפוי פרימיום", desc: "עבודות דיוק בלייזר לכל סוגי האריחים.", price: "280", unit: "מ\"ר", icon: LayoutGrid, img: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=800" },
+  
+  // מוצרים מהקטלוג (PDF)
+  { id: "p1", type: "product", cat: "ריצוף פנים", title: "מונטריאול אפור", desc: "גרניט פורצלן 80/80 מט R10 - סטודיו קרמיקה.", price: "מפרט קבלן", unit: "מ\"ר", icon: Box, img: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=800" },
+  { id: "p2", type: "product", cat: "ריצוף פנים", title: "אידרה בז' משי", desc: "אריחי 80/80 בגימור משי יוקרתי.", price: "מפרט קבלן", unit: "מ\"ר", icon: Box, img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800" },
+  { id: "p3", type: "product", cat: "ריצוף פנים", title: "אמאני לבן", desc: "מראה שיש נקי ומבריק (Lappato).", price: "מפרט קבלן", unit: "מ\"ר", icon: Box, img: "https://images.unsplash.com/photo-1615873968403-89e068628265?q=80&w=800" },
+  { id: "p4", type: "product", cat: "ריצוף פנים", title: "ארק סילבר", desc: "סדרת ARC מודרנית בגוון אפור בטון.", price: "מפרט קבלן", unit: "מ\"ר", icon: Box, img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd6b?q=80&w=800" },
+  { id: "p5", type: "product", cat: "ריצוף חוץ", title: "דקו בטון אפור", desc: "אנטי-סליפ 33/33 למרפסות וחוץ.", price: "מפרט קבלן", unit: "מ\"ר", icon: Box, img: "https://images.unsplash.com/photo-1541888941255-081ad89b9ec6?q=80&w=800" },
+  { id: "p6", type: "product", cat: "ריצוף דמוי עץ", title: "מדרה אלון", desc: "גרניט פורצלן 60/15 במראה עץ טבעי.", price: "מפרט קבלן", unit: "מ\"ר", icon: Box, img: "https://images.unsplash.com/photo-1581850518616-bcb8186c443e?q=80&w=800" },
+  { id: "p7", type: "product", cat: "סניטריה", title: "אסלה תלויה GEBERIT", desc: "סדרת יוקרה כולל מושב הידראולי.", price: "מפרט קבלן", unit: "יח'", icon: Box, img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800" },
+  { id: "p8", type: "product", cat: "ברזים", title: "ברז אומגה שחור", desc: "סדרת Ruby פרימיום בגימור מט.", price: "מפרט קבלן", unit: "יח'", icon: Box, img: "https://images.unsplash.com/photo-1608156104210-9883597996b7?q=80&w=800" },
+  { id: "p9", type: "product", cat: "דלתות", title: "דלת פולימרית רב-בריח", desc: "דלת עמידה למים בגימור לבן/שמנת.", price: "מפרט קבלן", unit: "יח'", icon: Box, img: "https://images.unsplash.com/photo-1506377585622-bedcbb027afc?q=80&w=800" },
+  { id: "p10", type: "product", cat: "סניטריה", title: "אינטרפוץ 4 דרך", desc: "מנגנון קרמי איכותי, כרום מבריק.", price: "מפרט קבלן", unit: "יח'", icon: Box, img: "https://images.unsplash.com/photo-1585202900225-6d3ac20a6962?q=80&w=800" }
+];
+
+export default function AAEfratiUltimateSite() {
   const [scrolled, setScrolled] = useState(false);
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("services");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState("הכל");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -27,186 +52,135 @@ export default function AAEfratiEnterpriseSite() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // --- דאטה: שירותי בנייה (30 שירותים) ---
-  const SERVICES = [
-    { id: "ser1", cat: "בנייה ושלד", title: "בניית וילות יוקרה", desc: "ליווי מאדריכלות ועד שלד מושלם", price: "9,500", icon: Home, img: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?q=80&w=600" },
-    { id: "ser2", cat: "בנייה ושלד", title: "תוספות בנייה והרחבות", desc: "הגדלת הבית בשיטות בנייה מתקדמות", price: "8,200", icon: Layers, img: "https://images.unsplash.com/photo-1541913055-94490e2c0bb5?q=80&w=600" },
-    { id: "ser3", cat: "בנייה ושלד", title: "עבודות שלד ובטון", desc: "יציקות, כלונסאות ותפסנות מקצועית", price: "4,500", icon: Construction, img: "https://images.unsplash.com/photo-1590644365607-1c5a519a7a37?q=80&w=600" },
-    { id: "ser4", cat: "גמר ועיצוב", title: "ריצוף וחיפוי שיש", desc: "עבודה עם לייזר לרמת דיוק מושלמת", price: "250", icon: LayoutGrid, img: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=600" },
-    { id: "ser5", cat: "תשתיות", title: "אינסטלציה וצנרת", desc: "מערכות SP וצנרת שקטה בסטנדרט גבוה", price: "2,500", icon: Droplets, img: "https://images.unsplash.com/photo-1607472586893-edb5caad0555?q=80&w=600" },
-    { id: "ser6", cat: "מערכות", title: "בריכות שחייה פרטיות", desc: "תכנון וביצוע בריכות בטון וגלישה", price: "150,000", icon: Waves, img: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=600" },
-    { id: "ser7", cat: "גמר ועיצוב", title: "עבודות גבס ועיצוב בתאורה", desc: "קרניזים, נישות וסינרים למזגן", price: "180", icon: Lightbulb, img: "https://images.unsplash.com/photo-1504148455328-497c5efdd156?q=80&w=600" },
-    { id: "ser8", cat: "בנייה ושלד", title: "חיזוק מבנים (תמ\"א 38)", desc: "חיזוק קונסטרוקטיבי ושיפור פני המבנה", price: "לפי תוכנית", icon: ShieldCheck, img: "https://images.unsplash.com/photo-1517581177682-a085bb7ffb15?q=80&w=600" },
-    // ... ניתן להוסיף כאן את כל ה-30 מהקוד הקודם, המבנה נשמר
-  ];
+  // סינון חכם ללא כפילויות
+  const items = useMemo(() => {
+    return ALL_DATA.filter(item => {
+      const matchFilter = filter === "הכל" || item.cat === filter || (filter === "שירותים" && item.type === "service") || (filter === "מוצרים" && item.type === "product");
+      const matchSearch = item.title.includes(search) || item.cat.includes(search);
+      return matchFilter && matchSearch;
+    });
+  }, [filter, search]);
 
-  // --- דאטה: קטלוג חומרים (לפי ה-PDF שלך) ---
-  const PRODUCTS = [
-    { id: "p1", cat: "ריצוף פנים", title: "מונטריאול אפור", desc: "גרניט פורצלן 80/80 מט R10", price: "מפרט קבלן", img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=600" },
-    { id: "p2", cat: "ריצוף פנים", title: "אידרה בז' משי", desc: "מגע משי יוקרתי, 80/80 אירופאי", price: "מפרט קבלן", img: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=600" },
-    { id: "p3", cat: "ריצוף פנים", title: "אמאני לבן", desc: "מראה שיש נקי ומבריק", price: "מפרט קבלן", img: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=600" },
-    { id: "p4", cat: "ריצוף פנים", title: "ארק סילבר", desc: "גוון אפור מודרני, גרפיקה משתנה", price: "מפרט קבלן", img: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=600" },
-    { id: "p5", cat: "חוץ ומרפסות", title: "דקו בטון אפור", desc: "אנטי סליפ 33/33 תקני", price: "מפרט קבלן", img: "https://images.unsplash.com/photo-1541888941255-081ad89b9ec6?q=80&w=600" },
-    { id: "p6", cat: "חדר רחצה", title: "מדרה אלון (דמוי פרקט)", desc: "גרניט פורצלן 60/15 במראה עץ", price: "מפרט קבלן", img: "https://images.unsplash.com/photo-1581850518616-bcb8186c443e?q=80&w=600" },
-    { id: "p7", cat: "סניטריה", title: "אסלה תלויה גבריט (GEBERIT)", desc: "כולל מושב הידראולי שקט", price: "מפרט קבלן", img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=600" },
-    { id: "p8", cat: "סניטריה", title: "ברז אומגה שחור מט", desc: "סדרת פרימיום רובי", price: "מפרט קבלן", img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=600" },
-    { id: "p9", cat: "דלתות פנים", title: "דלת פולימרית רב-בריח", desc: "100% עמידות למים, מבחר גוונים", price: "מפרט קבלן", img: "https://images.unsplash.com/photo-1506377585622-bedcbb027afc?q=80&w=600" },
-    { id: "p10", cat: "סניטריה", title: "אינטרפוץ 4 דרך", desc: "גימור כרום / זהב מוברש", price: "מפרט קבלן", img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=600" }
-  ];
-
-  const addToCart = (item) => {
-    if (!cart.find(i => i.id === item.id)) {
-      setCart([...cart, item]);
-      setIsCartOpen(true);
-    }
+  const toggleCart = (item) => {
+    setCart(prev => prev.find(i => i.id === item.id) ? prev.filter(i => i.id !== item.id) : [...prev, item]);
+    if (!cart.find(i => i.id === item.id)) setIsCartOpen(true);
   };
 
-  const removeFromCart = (id) => setCart(cart.filter(i => i.id !== id));
-
-  const filteredItems = (activeTab === 'services' ? SERVICES : PRODUCTS).filter(item => 
-    item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    item.cat.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const sendOrder = () => {
-    const message = `שלום א.א אפרתי,\nאני מעוניין לקבל הצעת מחיר עבור הפריטים הבאים:\n\n${cart.map(i => `✅ ${i.title} (${i.cat})`).join('\n')}\n\nאשמח ליצירת קשר בהקדם.`;
-    window.open(`https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+    const text = `שלום א.א אפרתי, אשמח לקבל הצעה מפורטת.\n\nהבחירות שלי מהאתר:\n${cart.map(i => `• ${i.title} (${i.cat})`).join("\n")}\n\nאזור שירות: [מרכז/י-ם/יו"ש]`;
+    window.open(`https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] rtl font-sans" dir="rtl">
+    <div className="min-h-screen bg-[#FCFCFC] text-slate-900 rtl font-sans" dir="rtl">
       
-      {/* Top Banner - Service Areas */}
-      <div className="bg-orange-600 text-white py-2 text-center text-xs font-black uppercase tracking-[2px] z-[60] relative">
-        <div className="container mx-auto px-6 flex justify-center items-center gap-4">
-          <MapPin size={14} />
-          <span>אזורי שירות: {SERVICE_AREAS}</span>
-        </div>
+      {/* Banner אזורי שירות */}
+      <div className="bg-slate-900 text-white py-2 text-center text-[10px] font-black uppercase tracking-[3px] z-[110] relative">
+        <MapPin size={10} className="inline-block ml-2 mb-0.5" />
+        שירות מקצועי בפריסה ארצית: {SERVICE_AREAS}
       </div>
 
-      {/* Main Navbar */}
-      <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? "top-0 bg-white shadow-2xl py-3" : "top-8 bg-transparent py-6"}`}>
+      {/* Navbar */}
+      <nav className={`fixed w-full z-[100] transition-all duration-500 ${scrolled ? "bg-white/90 backdrop-blur-md shadow-xl py-2" : "bg-transparent py-6"}`}>
         <div className="container mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <div className="bg-[#0F172A] p-2.5 rounded-2xl shadow-lg">
-              <ShieldCheck className="text-orange-500 w-7 h-7" />
+          <div className="flex items-center gap-3 group cursor-pointer">
+            <div className="bg-orange-600 p-2 rounded-2xl shadow-lg group-hover:rotate-12 transition-transform">
+              <ShieldCheck className="text-white w-6 h-6" />
             </div>
             <div>
-              <span className="text-2xl font-[1000] tracking-tighter block leading-none">א.א אפרתי</span>
-              <span className="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Construction & Design</span>
+              <span className="text-2xl font-[1000] tracking-tighter block leading-none">{BRAND_NAME}</span>
+              <span className="text-[9px] font-bold text-orange-600 uppercase tracking-widest mt-1">קבוצת בנייה והנדסה</span>
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center bg-slate-100 p-1.5 rounded-2xl">
-            <button 
-              onClick={() => setActiveTab('services')}
-              className={`px-8 py-2.5 rounded-xl font-black text-sm transition-all ${activeTab === 'services' ? "bg-white text-orange-600 shadow-sm" : "text-slate-500 hover:text-slate-900"}`}
-            >
-              שירותי בנייה
-            </button>
-            <button 
-              onClick={() => setActiveTab('shop')}
-              className={`px-8 py-2.5 rounded-xl font-black text-sm transition-all ${activeTab === 'shop' ? "bg-white text-orange-600 shadow-sm" : "text-slate-500 hover:text-slate-900"}`}
-            >
-              קטלוג חומרי גמר
-            </button>
+          <div className="hidden lg:flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200/50">
+            {["הכל", "שירותים", "מוצרים", "ריצוף פנים"].map((f) => (
+              <button 
+                key={f} 
+                onClick={() => setFilter(f)}
+                className={`px-6 py-2 rounded-xl text-xs font-black transition-all ${filter === f ? "bg-white text-orange-600 shadow-md" : "text-slate-400 hover:text-slate-600"}`}
+              >
+                {f}
+              </button>
+            ))}
           </div>
 
           <div className="flex items-center gap-4">
-            <button onClick={() => setIsCartOpen(true)} className="relative p-3 bg-white border border-slate-200 rounded-2xl hover:border-orange-500 transition-all group">
-              <ShoppingCart className="text-slate-900 group-hover:text-orange-600" size={24} />
-              {cart.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center font-black border-2 border-white animate-bounce">
-                  {cart.length}
-                </span>
-              )}
+            <button onClick={() => setIsCartOpen(true)} className="relative p-3 bg-white border-2 border-slate-100 rounded-2xl hover:border-orange-600 transition-all group">
+              <ShoppingCart size={22} className="group-hover:text-orange-600 transition-colors" />
+              {cart.length > 0 && <span className="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center font-bold border-2 border-white animate-pulse">{cart.length}</span>}
             </button>
-            <a href={`tel:${PHONE_NUMBER}`} className="bg-[#0F172A] text-white px-6 py-3 rounded-2xl font-black text-sm hover:bg-orange-600 transition-all hidden md:block">
-              חיוג מהיר
+            <a href={`tel:${PHONE_NUMBER}`} className="hidden md:flex bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-xs hover:bg-orange-600 transition-all items-center gap-2">
+              <PhoneCall size={16} /> שיחה ישירה
             </a>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-60 pb-32 overflow-hidden bg-white">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-slate-50 skew-x-12 translate-x-20 z-0" />
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-4xl">
-            <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
-              <h1 className="text-6xl md:text-9xl font-[1000] leading-[0.85] tracking-[-4px] mb-8">
-                בנייה. עיצוב.<br />
-                <span className="text-orange-600">מצוינות.</span>
-              </h1>
-              <p className="text-xl md:text-2xl text-slate-500 font-bold mb-12 max-w-xl leading-relaxed">
-                הופכים חלום למציאות במרכז, ירושלים ויו"ש. קבלן רשום המשלב ביצוע מושלם עם אספקת חומרי פרימיום.
-              </p>
-              
-              <div className="flex flex-wrap gap-4">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                  <input 
-                    type="text" 
-                    placeholder="חפש שירות או מוצר (למשל: ריצוף, אינסטלציה...)" 
-                    className="w-full bg-slate-100 border-none py-5 pr-12 pl-6 rounded-2xl font-bold focus:ring-2 focus:ring-orange-600 transition-all outline-none"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          </div>
+      <section className="relative pt-48 pb-24 overflow-hidden">
+        <div className="container mx-auto px-6 text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <h2 className="text-6xl md:text-[110px] font-[1000] leading-[0.85] tracking-[-4px] mb-8">
+              הבית שלך,<br /><span className="text-orange-600 italic">בידיים בטוחות.</span>
+            </h2>
+            <p className="text-xl md:text-2xl text-slate-500 font-bold max-w-2xl mx-auto mb-12">
+              מומחים בבנייה, גמר ואספקת חומרים יוקרתיים. <br className="hidden md:block" />
+              חווית בנייה שמתחילה בתכנון ומסתיימת בחיוך.
+            </p>
+            <div className="max-w-xl mx-auto relative group">
+              <Search className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-600 transition-colors" size={20} />
+              <input 
+                type="text" 
+                placeholder="חפש מוצר (מונטריאול, אידרה) או שירות..." 
+                className="w-full bg-white border-2 border-slate-100 py-5 pr-14 pl-6 rounded-[24px] font-bold shadow-xl shadow-slate-200/50 outline-none focus:border-orange-600 transition-all"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Grid Content */}
-      <section className="py-24 container mx-auto px-6">
+      {/* Main Grid */}
+      <section className="py-20 container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
           <AnimatePresence mode="popLayout">
-            {filteredItems.map((item, index) => (
+            {items.map((item) => (
               <motion.div
                 layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ delay: index * 0.05 }}
                 key={item.id}
-                className="bg-white rounded-[48px] overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 group"
+                className="bg-white rounded-[44px] border border-slate-100 p-5 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-700 group"
               >
-                <div className="h-72 relative overflow-hidden">
-                  <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8">
-                    <p className="text-white text-sm font-bold leading-snug">{item.desc}</p>
+                <div className="h-72 rounded-[36px] overflow-hidden relative mb-6">
+                  <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black text-orange-600 uppercase tracking-widest shadow-sm">
+                    {item.cat}
                   </div>
-                  <div className="absolute top-6 left-6">
-                    <div className="bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-xl">
-                      {item.icon ? <item.icon className="text-orange-600 w-6 h-6" /> : <Box className="text-orange-600 w-6 h-6" />}
-                    </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8">
+                    <p className="text-white text-xs font-bold leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
                 
-                <div className="p-8">
-                  <div className="flex justify-between items-start mb-4">
+                <div className="px-2">
+                  <h3 className="text-2xl font-[900] mb-2 tracking-tighter group-hover:text-orange-600 transition-colors">{item.title}</h3>
+                  <div className="flex items-center justify-between mt-6">
                     <div>
-                      <span className="text-[10px] font-[1000] text-orange-600 uppercase tracking-[2px] block mb-1">{item.cat}</span>
-                      <h3 className="text-2xl font-[900] leading-tight tracking-tighter">{item.title}</h3>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between pt-6 border-t border-slate-50 mt-4">
-                    <div>
-                      <span className="text-2xl font-black text-[#0F172A]">₪{item.price}</span>
-                      <span className="text-slate-400 text-[10px] font-bold block uppercase tracking-tighter">מחיר יחידה/מ"ר</span>
+                      <span className="text-xl font-black text-slate-900">₪{item.price}</span>
+                      <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-tighter">ל-{item.unit}</span>
                     </div>
                     <button 
-                      onClick={() => addToCart(item)}
-                      className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-sm transition-all ${
+                      onClick={() => toggleCart(item)}
+                      className={`p-4 rounded-[20px] transition-all ${
                         cart.find(i => i.id === item.id) 
                           ? "bg-green-500 text-white shadow-lg shadow-green-100" 
-                          : "bg-[#0F172A] text-white hover:bg-orange-600 shadow-lg shadow-slate-100"
+                          : "bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white"
                       }`}
                     >
-                      {cart.find(i => i.id === item.id) ? <><Check size={18} /> נוסף</> : <><Plus size={18} /> בחר</>}
+                      {cart.find(i => i.id === item.id) ? <Check size={20} /> : <Plus size={20} />}
                     </button>
                   </div>
                 </div>
@@ -220,80 +194,58 @@ export default function AAEfratiEnterpriseSite() {
       <AnimatePresence>
         {isCartOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCartOpen(false)} className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100]" />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed inset-y-0 right-0 w-full md:w-[500px] bg-white z-[101] shadow-2xl p-12 flex flex-col">
-              <div className="flex justify-between items-center mb-12">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCartOpen(false)} className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[200]" />
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed inset-y-0 right-0 w-full md:w-[500px] bg-white z-[201] shadow-2xl p-10 flex flex-col">
+              <div className="flex justify-between items-center mb-10">
                 <div>
-                  <h2 className="text-4xl font-[1000] tracking-tighter">הסל שלך</h2>
-                  <p className="text-slate-400 font-bold">סיכום בחירות חומרים ועבודות</p>
+                  <h2 className="text-3xl font-[1000] tracking-tighter uppercase">הסל שלי</h2>
+                  <div className="h-1 w-12 bg-orange-600 mt-1"></div>
                 </div>
-                <button onClick={() => setIsCartOpen(false)} className="bg-slate-100 p-3 rounded-2xl hover:bg-orange-100 transition-colors"><X size={24}/></button>
+                <button onClick={() => setIsCartOpen(false)} className="bg-slate-100 p-3 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all"><X size={24}/></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+              <div className="flex-1 overflow-y-auto space-y-4 pr-2">
                 {cart.length === 0 ? (
-                  <div className="text-center py-20">
-                    <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"><ShoppingCart className="text-slate-300" size={32}/></div>
-                    <p className="text-slate-400 font-black">הסל ריק. הגיע הזמן לבחור חומרים!</p>
-                  </div>
+                  <div className="text-center py-20 opacity-20 font-black italic">הסל ריק... עדיין.</div>
                 ) : cart.map(item => (
-                  <div key={item.id} className="flex gap-6 p-6 bg-slate-50 rounded-[32px] border border-slate-100 relative group transition-all hover:bg-white hover:shadow-xl">
-                    <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-sm">
-                      <img src={item.img} className="w-full h-full object-cover" />
-                    </div>
+                  <div key={item.id} className="flex gap-4 p-4 bg-slate-50 rounded-[28px] border border-slate-100 group hover:bg-white hover:shadow-xl transition-all">
+                    <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm flex-shrink-0"><img src={item.img} className="w-full h-full object-cover" /></div>
                     <div className="flex-1">
-                      <span className="text-[9px] font-black text-orange-600 uppercase tracking-widest">{item.cat}</span>
-                      <h4 className="text-xl font-black text-[#0F172A]">{item.title}</h4>
-                      <p className="text-sm font-bold text-slate-400">מחיר מוערך: ₪{item.price}</p>
+                      <h4 className="font-black text-slate-900 leading-none mb-1">{item.title}</h4>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.cat}</p>
                     </div>
-                    <button onClick={() => removeFromCart(item.id)} className="text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={20}/></button>
+                    <button onClick={() => toggleCart(item)} className="text-slate-300 hover:text-red-500 transition-colors px-2"><Trash2 size={18}/></button>
                   </div>
                 ))}
               </div>
 
-              <div className="pt-10 border-t mt-8 space-y-4">
-                <button 
-                  onClick={sendOrder}
-                  disabled={cart.length === 0}
-                  className="w-full bg-orange-600 text-white py-6 rounded-[28px] font-[1000] text-xl shadow-2xl shadow-orange-200 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-4"
-                >
-                  <MessageSquare size={24} />
-                  שלח הצעה לוואטסאפ
+              <div className="pt-10 border-t mt-6">
+                <button onClick={sendOrder} className="w-full bg-orange-600 text-white py-6 rounded-3xl font-[1000] text-xl shadow-2xl shadow-orange-200 hover:scale-[1.02] active:scale-95 transition-all">
+                  שלח מפרט לוואטסאפ
                 </button>
-                <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">ההצעה אינה סופית וכפופה למדידה בשטח</p>
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Floating Global Contact */}
-      <div className="fixed bottom-8 left-8 z-[90] flex flex-col gap-4">
-        <a href={`https://wa.me/${PHONE_NUMBER}`} className="bg-[#25D366] text-white p-5 rounded-3xl shadow-2xl hover:scale-110 transition-all"><MessageSquare size={32}/></a>
-        <a href={`tel:${PHONE_NUMBER}`} className="bg-[#0F172A] text-white p-5 rounded-3xl shadow-2xl hover:scale-110 transition-all"><PhoneCall size={32}/></a>
-      </div>
-
-      <footer className="bg-[#0F172A] text-white py-32 mt-20">
-        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16">
-          <div className="col-span-1 md:col-span-2">
-            <h2 className="text-5xl font-[1000] mb-8 leading-none">א.א אפרתי - <br /><span className="text-orange-600">בונים את העתיד שלך.</span></h2>
-            <p className="text-slate-400 text-xl font-bold max-w-xl mb-12">קבוצת א.א אפרתי מתמחה בניהול פרויקטים הנדסיים, בניית שלד וגמר בסטנדרטים בינלאומיים. שירות בפריסה רחבה במרכז, ירושלים ויהודה ושומרון.</p>
-            <div className="flex gap-8">
-              <a href="#" className="text-white hover:text-orange-600 transition-colors font-black uppercase text-xs tracking-widest">Instagram</a>
-              <a href="#" className="text-white hover:text-orange-600 transition-colors font-black uppercase text-xs tracking-widest">Facebook</a>
-              <a href="#" className="text-white hover:text-orange-600 transition-colors font-black uppercase text-xs tracking-widest">WhatsApp</a>
+      {/* Footer */}
+      <footer className="bg-slate-900 text-white py-24 mt-20">
+        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16">
+          <div>
+            <h2 className="text-5xl font-[1000] mb-8 leading-none italic">{BRAND_NAME}</h2>
+            <p className="text-slate-400 font-bold max-w-md text-lg leading-relaxed">
+              מלווים אתכם בכל שלב – מהיסודות ועד לפרטים הקטנים של הגמר. שירות אישי, הנדסה מדויקת ואמינות ללא פשרות במרכז ובאזור ירושלים.
+            </p>
+          </div>
+          <div className="flex flex-col md:items-end justify-center gap-6">
+            <div className="flex gap-4">
+              <div className="p-4 bg-white/5 rounded-2xl hover:bg-orange-600 transition-all cursor-pointer"><Instagram size={24}/></div>
+              <div className="p-4 bg-white/5 rounded-2xl hover:bg-orange-600 transition-all cursor-pointer"><Facebook size={24}/></div>
+              <a href={`https://wa.me/${PHONE_NUMBER}`} className="p-4 bg-white/5 rounded-2xl hover:bg-green-500 transition-all"><MessageSquare size={24}/></a>
             </div>
+            <p className="text-slate-500 font-black text-[10px] uppercase tracking-[4px]">© 2024 A.A EFRATI GROUP. ALL RIGHTS RESERVED.</p>
           </div>
-          <div className="bg-white/5 p-10 rounded-[40px] border border-white/10 h-fit">
-            <h4 className="font-black text-orange-600 uppercase tracking-widest text-xs mb-6">צור קשר ישיר</h4>
-            <p className="text-2xl font-black mb-2">050-0000000</p>
-            <p className="text-slate-400 font-bold mb-8">office@efrati-build.co.il</p>
-            <button className="w-full bg-white text-[#0F172A] py-4 rounded-2xl font-black hover:bg-orange-600 hover:text-white transition-all">השאר פרטים</button>
-          </div>
-        </div>
-        <div className="container mx-auto px-6 pt-20 mt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[3px]">© 2024 A.A EFRATI CONSTRUCTION GROUP. ALL RIGHTS RESERVED.</p>
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[3px]">Design by Premium AI</p>
         </div>
       </footer>
     </div>
